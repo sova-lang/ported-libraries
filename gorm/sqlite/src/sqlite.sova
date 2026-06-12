@@ -1,0 +1,8 @@
+package gorm/sqlite on backend
+
+extern {
+    /// Build a SQLite dialector for `gorm.open` from a DSN. The DSN is either a filesystem path (e.g. `"app.db"`) or one of SQLite's URI forms (`":memory:"`, `"file:cache?mode=memory&cache=shared"`). The driver is the pure-Go `github.com/glebarez/sqlite` — no CGO toolchain or C SQLite installation is required.
+    func open(dsn: string): any = {
+        backend("github.com/glebarez/sqlite@v1.11.0"): "sqlite.Open"
+    }
+}

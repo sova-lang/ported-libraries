@@ -1,0 +1,64 @@
+package gorm on backend
+
+extern {
+    /// Insert a single record. `value` is a pointer to a Go struct; on success the struct's primary-key field is populated with the new ID. Returns the same `db` handle for chaining; use `lastError(db)` and `rowsAffected(db)` to inspect the outcome.
+    func create(db: any, value: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, v any) any { return db.(*gorm.DB).Create(v) }"
+    }
+
+    /// Insert multiple records in a single statement. `values` is a slice (or pointer to a slice) of model structs.
+    func createBatch(db: any, values: any, batchSize: int): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, v any, n int64) any { return db.(*gorm.DB).CreateInBatches(v, int(n)) }"
+    }
+
+    /// Save a record: upsert behaviour — performs an INSERT when the primary key is zero, otherwise an UPDATE of every field.
+    func save(db: any, value: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, v any) any { return db.(*gorm.DB).Save(v) }"
+    }
+
+    /// Update a subset of columns on the records matched by the current query chain. `values` may be a struct (only non-zero fields update) or a `map[string]any` (every key updates).
+    func updates(db: any, values: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, v any) any { return db.(*gorm.DB).Updates(v) }"
+    }
+
+    /// Update a single column on the records matched by the current query chain.
+    func update(db: any, column: string, value: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, c string, v any) any { return db.(*gorm.DB).Update(c, v) }"
+    }
+
+    /// Delete the records matched by the current query chain. Pass the model as a typed pointer (e.g. `new User()`) so GORM knows the target table.
+    func deleteRecord(db: any, value: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, v any) any { return db.(*gorm.DB).Delete(v) }"
+    }
+
+    /// Fetch the first record matching the current query into `out`. Pass a pointer to a model value or a slice. Returns the same handle; check `lastError(db)` — `record not found` is the message when no row matches.
+    func first(db: any, out: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, o any) any { return db.(*gorm.DB).First(o) }"
+    }
+
+    /// Fetch the first record by primary-key value.
+    func firstByID(db: any, out: any, id: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, o any, id any) any { return db.(*gorm.DB).First(o, id) }"
+    }
+
+    /// Fetch the last record matching the current query (ordered descending by primary key).
+    func last(db: any, out: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, o any) any { return db.(*gorm.DB).Last(o) }"
+    }
+
+    /// Fetch every record matching the current query into `out`, which must be a pointer to a slice of the model type.
+    func find(db: any, out: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, o any) any { return db.(*gorm.DB).Find(o) }"
+    }
+
+    func countInto(db: any, holder: []int) = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, h []int64) { var n int64; db.(*gorm.DB).Count(&n); if len(h) > 0 { h[0] = n } }"
+    }
+}
+
+/// Count the number of records matching the current query. The chained `db` handle should point at the table/model you want to count — typically via `count(where(table(db, \"users\"), \"age > ?\", [18]))`.
+func count(db: any): int {
+    let holder: []int = [0]
+    countInto(db, holder)
+    return holder[0]
+}

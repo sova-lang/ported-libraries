@@ -1,0 +1,23 @@
+package redis on backend
+
+extern {
+    /// Publish a message to a channel. Returns the number of subscribers that received the message.
+    func publish(client: any, channel: string, message: string): int = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, ch string, m string) int64 { n, err := c.(*redis.Client).Publish(context.Background(), ch, m).Result(); if err != nil { return 0 }; return n }"
+    }
+
+    /// Subscribe to one or more channels. The handler is invoked for every message that arrives — `(channel, payload)` — and runs on a dedicated goroutine, so it must not block on Sova state that the main routine holds. Returns a subscription handle that you pass to `unsubscribe` for teardown.
+    func subscribe(client: any, channels: []any, handler: func(channel: string, payload: string)): any = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, chs []any, h func(string, string)) any { strs := make([]string, len(chs)); for i, ch := range chs { if s, ok := ch.(string); ok { strs[i] = s } }; ps := c.(*redis.Client).Subscribe(context.Background(), strs...); go func() { for msg := range ps.Channel() { h(msg.Channel, msg.Payload) } }(); return ps }"
+    }
+
+    /// Subscribe by glob pattern (e.g. `\"news.*\"`). The handler receives the actual channel name a message was published on, plus the payload.
+    func psubscribe(client: any, patterns: []any, handler: func(channel: string, payload: string)): any = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, pats []any, h func(string, string)) any { strs := make([]string, len(pats)); for i, p := range pats { if s, ok := p.(string); ok { strs[i] = s } }; ps := c.(*redis.Client).PSubscribe(context.Background(), strs...); go func() { for msg := range ps.Channel() { h(msg.Channel, msg.Payload) } }(); return ps }"
+    }
+
+    /// Close a subscription handle. Stops the consumer goroutine and unsubscribes from every channel/pattern on the underlying connection.
+    func unsubscribe(subscription: any): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(s any) bool { return s.(*redis.PubSub).Close() == nil }"
+    }
+}

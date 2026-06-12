@@ -1,0 +1,83 @@
+package redis on backend
+
+extern {
+    /// Open a connection to a Redis server. `url` accepts the standard `redis://[:password@]host:port/db` URI form; for plain `host:port` use `connect("redis://" + addr)`. Returns the client handle as `any`, or `none` if the URL is malformed.
+    func connect(url: string): any = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(u string) any { opts, err := redis.ParseURL(u); if err != nil { return nil }; return redis.NewClient(opts) }"
+    }
+
+    /// Open a connection to a Redis server with explicit address and password. `db` is the logical database index (0 for the default).
+    func connectAddr(addr: string, password: string, db: int): any = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(a string, p string, d int64) any { return redis.NewClient(&redis.Options{Addr: a, Password: p, DB: int(d)}) }"
+    }
+
+    /// Close the client and release pooled connections.
+    func close(client: any): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any) bool { return c.(*redis.Client).Close() == nil }"
+    }
+
+    /// Round-trip a `PING`. Returns true when the server replies `PONG`.
+    func ping(client: any): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any) bool { return c.(*redis.Client).Ping(context.Background()).Err() == nil }"
+    }
+
+    /// Set a string value. `ttlSeconds` is the expiry in seconds — pass 0 to keep the key forever.
+    func set(client: any, key: string, value: string, ttlSeconds: int): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string, v string, t int64) bool { return c.(*redis.Client).Set(context.Background(), k, v, time.Duration(t)*time.Second).Err() == nil }"
+    }
+
+    /// Set a value only if the key does not exist. Returns true when the key was created, false when it already existed (or on error).
+    func setNX(client: any, key: string, value: string, ttlSeconds: int): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string, v string, t int64) bool { r, err := c.(*redis.Client).SetNX(context.Background(), k, v, time.Duration(t)*time.Second).Result(); if err != nil { return false }; return r }"
+    }
+
+    /// Get a string value. Returns the empty string when the key is missing or on connection error; use `exists` to distinguish "absent" from "present but empty".
+    func get(client: any, key: string): string = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string) string { v, err := c.(*redis.Client).Get(context.Background(), k).Result(); if err != nil { return \"\" }; return v }"
+    }
+
+    /// Delete one or more keys. Returns the number of keys that were removed.
+    func del(client: any, keys: []any): int = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, ks []any) int64 { strs := make([]string, len(ks)); for i, k := range ks { if s, ok := k.(string); ok { strs[i] = s } }; n, err := c.(*redis.Client).Del(context.Background(), strs...).Result(); if err != nil { return 0 }; return n }"
+    }
+
+    /// Return true when the key exists.
+    func exists(client: any, key: string): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string) bool { n, err := c.(*redis.Client).Exists(context.Background(), k).Result(); if err != nil { return false }; return n > 0 }"
+    }
+
+    /// Set the expiry (in seconds) on an existing key. Returns true when the key existed and the TTL was applied.
+    func expire(client: any, key: string, ttlSeconds: int): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string, t int64) bool { r, err := c.(*redis.Client).Expire(context.Background(), k, time.Duration(t)*time.Second).Result(); if err != nil { return false }; return r }"
+    }
+
+    /// Return the remaining TTL of `key` in seconds. -1 means "no expiry set", -2 means "key does not exist".
+    func ttl(client: any, key: string): int = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string) int64 { d, err := c.(*redis.Client).TTL(context.Background(), k).Result(); if err != nil { return -2 }; return int64(d.Seconds()) }"
+    }
+
+    /// Increment the integer value of `key` by one. Creates the key set to `0` if it does not exist. Returns the new value, or -1 on error.
+    func incr(client: any, key: string): int = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string) int64 { v, err := c.(*redis.Client).Incr(context.Background(), k).Result(); if err != nil { return -1 }; return v }"
+    }
+
+    /// Increment `key` by `delta`.
+    func incrBy(client: any, key: string, delta: int): int = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string, d int64) int64 { v, err := c.(*redis.Client).IncrBy(context.Background(), k, d).Result(); if err != nil { return -1 }; return v }"
+    }
+
+    /// Decrement the integer value of `key` by one.
+    func decr(client: any, key: string): int = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, k string) int64 { v, err := c.(*redis.Client).Decr(context.Background(), k).Result(); if err != nil { return -1 }; return v }"
+    }
+
+    /// List every key matching the glob-style `pattern`. Use sparingly on large databases — Redis walks the keyspace synchronously.
+    func keys(client: any, pattern: string): []any = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any, p string) []any { ks, err := c.(*redis.Client).Keys(context.Background(), p).Result(); if err != nil { return nil }; out := make([]any, len(ks)); for i, k := range ks { out[i] = k }; return out }"
+    }
+
+    /// Flush every key in the currently-selected database. Intended for tests; do not call against shared databases.
+    func flushDB(client: any): bool = {
+        backend("github.com/redis/go-redis/v9@v9.7.0"): "func(c any) bool { return c.(*redis.Client).FlushDB(context.Background()).Err() == nil }"
+    }
+}

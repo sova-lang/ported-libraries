@@ -1,0 +1,38 @@
+package gorm on backend
+
+extern {
+    /// Open a database connection using the given dialector (produced by a driver package like `gorm/sqlite` or `gorm/postgres`). Returns a `*gorm.DB` handle as `any`, or `none` if the connection fails. Call `lastError(db)` on the returned handle to retrieve the error message.
+    func open(dialector: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(d any) any { db, err := gorm.Open(d.(gorm.Dialector), &gorm.Config{}); if err != nil { return nil }; return db }"
+    }
+
+    /// Open a database connection with a custom `gorm.Config` (also typed as `any` — build it via `newConfig()` and tweak the resulting map before passing).
+    func openWithConfig(dialector: any, config: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(d any, c any) any { var cfg *gorm.Config; if m, ok := c.(map[string]any); ok { cfg = &gorm.Config{}; if v, ok := m[\"skipDefaultTransaction\"].(bool); ok { cfg.SkipDefaultTransaction = v }; if v, ok := m[\"prepareStmt\"].(bool); ok { cfg.PrepareStmt = v }; if v, ok := m[\"dryRun\"].(bool); ok { cfg.DryRun = v } } else { cfg = &gorm.Config{} }; db, err := gorm.Open(d.(gorm.Dialector), cfg); if err != nil { return nil }; return db }"
+    }
+
+    /// Close the underlying `*sql.DB`. After this call the handle is unusable.
+    func close(db: any): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any) bool { sqlDB, err := db.(*gorm.DB).DB(); if err != nil { return false }; return sqlDB.Close() == nil }"
+    }
+
+    /// Issue a one-shot `SELECT 1`-style round-trip to confirm the connection is live.
+    func ping(db: any): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any) bool { sqlDB, err := db.(*gorm.DB).DB(); if err != nil { return false }; return sqlDB.Ping() == nil }"
+    }
+
+    /// Return the message of the most recent error attached to the GORM session. Empty string when no error occurred. Mirrors GORM's `db.Error.Error()` pattern: each chain step records its error on the handle, and you check after the final terminal call.
+    func lastError(db: any): string = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any) string { if e := db.(*gorm.DB).Error; e != nil { return e.Error() }; return \"\" }"
+    }
+
+    /// Return the number of rows affected by the last terminal call on this handle (`create`, `save`, `update`, `delete`).
+    func rowsAffected(db: any): int = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any) int64 { return db.(*gorm.DB).RowsAffected }"
+    }
+}
+
+/// Build an empty config map. Set keys before passing to `openWithConfig`; supported keys today are `"skipDefaultTransaction"` (bool), `"prepareStmt"` (bool), and `"dryRun"` (bool). Unknown keys are ignored.
+func newConfig(): any {
+    return { }
+}

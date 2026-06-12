@@ -1,0 +1,8 @@
+[package]
+name = "gorm/sqlite"
+version = "0.1.0"
+description = "Pure-Go SQLite driver for the Sova gorm port (backed by github.com/glebarez/sqlite — no CGO required)."
+license = "MIT"
+
+[dependencies]
+gorm = { path = "../core" }

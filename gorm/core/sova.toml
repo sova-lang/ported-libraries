@@ -1,0 +1,7 @@
+[package]
+name = "gorm"
+version = "0.1.0"
+description = "Sova port of gorm.io/gorm. Connect, CRUD, queries, transactions; backend-only."
+license = "MIT"
+
+[dependencies]

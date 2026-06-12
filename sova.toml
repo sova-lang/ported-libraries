@@ -1,0 +1,5 @@
+[workspace]
+members = ["gorm/core", "gorm/sqlite", "gorm/postgres", "redis"]
+default-members = ["gorm/core"]
+
+[workspace.dependencies]

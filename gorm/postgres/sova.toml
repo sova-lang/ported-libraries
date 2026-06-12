@@ -1,0 +1,8 @@
+[package]
+name = "gorm/postgres"
+version = "0.1.0"
+description = "PostgreSQL driver for the Sova gorm port (backed by gorm.io/driver/postgres, which uses pgx under the hood)."
+license = "MIT"
+
+[dependencies]
+gorm = { path = "../core" }

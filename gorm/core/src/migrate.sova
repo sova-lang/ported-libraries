@@ -1,0 +1,18 @@
+package gorm on backend
+
+extern {
+    /// Run GORM's `AutoMigrate` against one or more model values. Each model is a Go-side struct (registered via an `extern` type binding) or a pointer to such a value; the migrator creates the table, adds missing columns, and ensures the schema matches the struct definition. Returns true on success; check `lastError(db)` for the failure reason on false.
+    func autoMigrate(db: any, models: []any): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, ms []any) bool { return db.(*gorm.DB).AutoMigrate(ms...) == nil }"
+    }
+
+    /// Drop one or more tables. Each entry can be a model value or a string table name.
+    func dropTable(db: any, models: []any): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, ms []any) bool { return db.(*gorm.DB).Migrator().DropTable(ms...) == nil }"
+    }
+
+    /// Report whether a table exists. Accepts a model value or a string table name.
+    func hasTable(db: any, model: any): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, m any) bool { return db.(*gorm.DB).Migrator().HasTable(m) }"
+    }
+}

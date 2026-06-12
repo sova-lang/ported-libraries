@@ -1,0 +1,7 @@
+[package]
+name = "redis"
+version = "0.1.0"
+description = "Sova port of github.com/redis/go-redis/v9. Connection, key-value commands, and Pub/Sub; backend-only."
+license = "MIT"
+
+[dependencies]

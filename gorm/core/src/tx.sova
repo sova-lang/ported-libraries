@@ -1,0 +1,33 @@
+package gorm on backend
+
+extern {
+    /// Run `fn` inside a database transaction. The callback receives a transactional `*gorm.DB` handle as `any`; if `fn` returns false (or panics), the transaction rolls back, otherwise it commits. Nested calls participate in the outer transaction via SAVEPOINTs.
+    func transaction(db: any, fn: func(tx: any): bool): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, fn func(any) bool) bool { return db.(*gorm.DB).Transaction(func(tx *gorm.DB) error { if fn(tx) { return nil }; return gorm.ErrInvalidTransaction }) == nil }"
+    }
+
+    /// Start a manual transaction, returning the transactional handle. Pair with `commit` / `rollback` instead of `transaction` when control flow does not fit a single closure.
+    func begin(db: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any) any { return db.(*gorm.DB).Begin() }"
+    }
+
+    /// Commit a transaction started via `begin`.
+    func commit(tx: any): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(tx any) bool { return tx.(*gorm.DB).Commit().Error == nil }"
+    }
+
+    /// Roll back a transaction started via `begin`.
+    func rollback(tx: any): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(tx any) bool { return tx.(*gorm.DB).Rollback().Error == nil }"
+    }
+
+    /// Create a savepoint inside the current transaction.
+    func savepoint(tx: any, name: string): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(tx any, n string) bool { return tx.(*gorm.DB).SavePoint(n).Error == nil }"
+    }
+
+    /// Roll back to a previously-created savepoint without aborting the surrounding transaction.
+    func rollbackTo(tx: any, name: string): bool = {
+        backend("gorm.io/gorm@v1.25.12"): "func(tx any, n string) bool { return tx.(*gorm.DB).RollbackTo(n).Error == nil }"
+    }
+}

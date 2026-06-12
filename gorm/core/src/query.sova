@@ -1,0 +1,68 @@
+package gorm on backend
+
+extern {
+    /// Add a `WHERE` clause to the current chain. `args` carries the placeholder substitutions: `where(db, "age > ?", [18])`. Returns a new chained handle — bind it to a fresh variable to keep the original `db` unmodified.
+    func where(db: any, query: string, args: []any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, q string, a []any) any { return db.(*gorm.DB).Where(q, a...) }"
+    }
+
+    /// Add a `NOT` clause; same shape as `where`.
+    func not(db: any, query: string, args: []any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, q string, a []any) any { return db.(*gorm.DB).Not(q, a...) }"
+    }
+
+    /// Add an `OR` clause; same shape as `where`.
+    func or(db: any, query: string, args: []any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, q string, a []any) any { return db.(*gorm.DB).Or(q, a...) }"
+    }
+
+    /// Append an `ORDER BY` clause. Pass a raw SQL fragment (`"created_at desc"`).
+    func order(db: any, value: string): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, v string) any { return db.(*gorm.DB).Order(v) }"
+    }
+
+    /// Append a `GROUP BY` clause. (Named `groupBy` because `group` is a reserved word in Sova.)
+    func groupBy(db: any, name: string): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, n string) any { return db.(*gorm.DB).Group(n) }"
+    }
+
+    /// Append a `HAVING` clause.
+    func having(db: any, query: string, args: []any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, q string, a []any) any { return db.(*gorm.DB).Having(q, a...) }"
+    }
+
+    /// Cap the result set size.
+    func limit(db: any, n: int): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, n int64) any { return db.(*gorm.DB).Limit(int(n)) }"
+    }
+
+    /// Skip the first `n` rows of the result set. Combine with `limit` for paging.
+    func offset(db: any, n: int): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, n int64) any { return db.(*gorm.DB).Offset(int(n)) }"
+    }
+
+    /// Restrict the columns returned to the listed names. Useful when reading wide tables into narrow result structs. (Named `selectColumns` because `select` is a reserved word in Sova.)
+    func selectColumns(db: any, columns: []any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, c []any) any { return db.(*gorm.DB).Select(c[0], c[1:]...) }"
+    }
+
+    /// Eager-load an associated relation by its struct field name. Chain multiple `preload` calls for several relations.
+    func preload(db: any, association: string): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, a string) any { return db.(*gorm.DB).Preload(a) }"
+    }
+
+    /// Add an explicit JOIN fragment to the query: `joins(db, \"LEFT JOIN orders ON orders.user_id = users.id\")`.
+    func joins(db: any, query: string): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, q string) any { return db.(*gorm.DB).Joins(q) }"
+    }
+
+    /// Pin a specific table for the next terminal call. Use when GORM cannot infer the table from the model — typically for raw map reads.
+    func table(db: any, name: string): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, n string) any { return db.(*gorm.DB).Table(n) }"
+    }
+
+    /// Mark the query as a distinct select on the given column.
+    func distinct(db: any, column: string): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, c string) any { return db.(*gorm.DB).Distinct(c) }"
+    }
+}

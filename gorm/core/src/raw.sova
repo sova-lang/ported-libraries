@@ -1,0 +1,18 @@
+package gorm on backend
+
+extern {
+    /// Execute a non-query SQL statement (INSERT/UPDATE/DELETE/DDL). `args` carries placeholder substitutions. Returns the same `db` for chaining; check `lastError(db)` and `rowsAffected(db)`.
+    func exec(db: any, sql: string, args: []any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, s string, a []any) any { return db.(*gorm.DB).Exec(s, a...) }"
+    }
+
+    /// Prepare a raw SQL SELECT and bind it for the next terminal `find`/`first` call. `args` carries placeholder substitutions.
+    func raw(db: any, sql: string, args: []any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, s string, a []any) any { return db.(*gorm.DB).Raw(s, a...) }"
+    }
+
+    /// Scan the next result row(s) into `out` — typically used after `raw` for ad-hoc selects whose shape does not match a model.
+    func scan(db: any, out: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, o any) any { return db.(*gorm.DB).Scan(o) }"
+    }
+}

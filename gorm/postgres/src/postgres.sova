@@ -1,0 +1,13 @@
+package gorm/postgres on backend
+
+extern {
+    /// Build a Postgres dialector for `gorm.open` from a DSN. Accepts the standard `pgx` connection-string forms — either a keyword DSN (`"host=localhost user=app password=... dbname=app port=5432 sslmode=disable"`) or a URI (`"postgres://app:secret@localhost:5432/app?sslmode=disable"`).
+    func open(dsn: string): any = {
+        backend("gorm.io/driver/postgres@v1.5.11"): "postgres.Open"
+    }
+
+    /// Open a Postgres dialector with a custom `postgres.Config`. Most projects use `open(dsn)`; reach for this when you need the lower-level `Config{ DSN, PreferSimpleProtocol, WithoutQuotingCheck, ... }` knobs.
+    func openWithConfig(config: any): any = {
+        backend("gorm.io/driver/postgres@v1.5.11"): "func(c any) any { if m, ok := c.(map[string]any); ok { cfg := postgres.Config{}; if v, ok := m[\"dsn\"].(string); ok { cfg.DSN = v }; if v, ok := m[\"preferSimpleProtocol\"].(bool); ok { cfg.PreferSimpleProtocol = v }; if v, ok := m[\"withoutQuotingCheck\"].(bool); ok { cfg.WithoutQuotingCheck = v }; return postgres.New(cfg) }; return postgres.Open(\"\") }"
+    }
+}
