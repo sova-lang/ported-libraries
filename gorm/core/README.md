@@ -180,11 +180,45 @@ if err != "" {
 
 ## Models
 
-Define models on the Go side and bind them in via an `extern` type
-declaration. Example: in `models.go.tpl` you ship next to your Sova
-sources, write a Go-format type with GORM struct tags; expose it in
-Sova through an extern type binding. The migrator and the CRUD calls
-all accept the resulting opaque `any`-typed value.
+Define models directly in Sova as ordinary `type` declarations. The Go
+backend emitter generates a matching Go struct (one field per Sova
+field, with names auto-exported); per-field `@structTag(<key>, <value>)`
+annotations control the Go struct tags GORM reflects on:
+
+```sova
+type User {
+    @structTag("gorm", "primaryKey;autoIncrement")
+    @structTag("json", "id")
+    id: int = 0
+
+    @structTag("gorm", "size:200;not null")
+    @structTag("gorm", "index")
+    name: string = ""
+
+    @structTag("gorm", "uniqueIndex")
+    email: string = ""
+
+    createdAt: time.Time
+}
+```
+
+The annotation is generic: the first argument is the tag *namespace*
+(`gorm`, `json`, `validate`, `xml`, ...) and the second is the literal
+value the tag should carry. Multiple `@structTag` entries with the
+same namespace concatenate with a single space, so `@structTag("gorm",
+"size:200")` plus `@structTag("gorm", "index")` produces
+`` `gorm:"size:200 index"` ``. The shape (exactly two string args) is
+enforced at compile time with a clear diagnostic when violated.
+
+A `json` tag is auto-emitted for every non-`__`-prefixed field — if
+you provide your own `@structTag("json", ...)` it overrides the
+default. Sova-private fields (`__internal`) get no tag at all so they
+stay invisible to JSON consumers.
+
+Reaching for a Go-side model + extern binding is still an option when
+you need fully hand-rolled struct definitions, but most projects can
+keep the model on the Sova side and let the compiler emit the Go
+struct + tags from a single source of truth.
 
 ## Version
 

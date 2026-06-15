@@ -1,0 +1,111 @@
+package gorm/annotations on synth
+
+synth PrimaryKey on field F {
+    emit on F {
+        @structTag("gorm", "primaryKey")
+    }
+}
+
+synth AutoIncrement on field F {
+    emit on F {
+        @structTag("gorm", "autoIncrement")
+    }
+}
+
+synth Pk on field F {
+    emit on F {
+        @structTag("gorm", "primaryKey;autoIncrement")
+    }
+}
+
+synth Column(name: string) on field F {
+    emit on F {
+        @structTag("gorm", "column:" + name)
+    }
+}
+
+synth Unique on field F {
+    emit on F {
+        @structTag("gorm", "unique")
+    }
+}
+
+synth UniqueIndex on field F {
+    emit on F {
+        @structTag("gorm", "uniqueIndex")
+    }
+}
+
+synth NamedUniqueIndex(idx: string) on field F {
+    emit on F {
+        @structTag("gorm", "uniqueIndex:" + idx)
+    }
+}
+
+synth Index on field F {
+    emit on F {
+        @structTag("gorm", "index")
+    }
+}
+
+synth NamedIndex(idx: string) on field F {
+    emit on F {
+        @structTag("gorm", "index:" + idx)
+    }
+}
+
+synth NotNull on field F {
+    emit on F {
+        @structTag("gorm", "not null")
+    }
+}
+
+synth Size(n: int) on field F {
+    emit on F {
+        @structTag("gorm", `size:${n}`)
+    }
+}
+
+synth Default(value: string) on field F {
+    emit on F {
+        @structTag("gorm", "default:" + value)
+    }
+}
+
+synth Constraints(rules: string) on field F {
+    emit on F {
+        @structTag("gorm", rules)
+    }
+}
+
+synth JSON(name: string) on field F {
+    emit on F {
+        @structTag("json", name)
+    }
+}
+
+synth Ignore on field F {
+    emit on F {
+        @structTag("gorm", "-")
+    }
+}
+
+synth Timestamps on type T {
+    emit createdAt: int = 0
+    emit updatedAt: int = 0
+}
+
+synth SoftDelete on type T {
+    emit deletedAt: int = 0
+}
+
+synth GormModel(table: string) on type T {
+    emit on T {
+        @structTag("strix.gorm.table", table)
+    }
+    for f in T.fields {
+        emit on f {
+            @structTag("gorm", "column:" + f.name)
+        }
+    }
+}
