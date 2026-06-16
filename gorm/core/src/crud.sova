@@ -46,9 +46,13 @@ extern {
         backend("gorm.io/gorm@v1.25.12"): "func(db any, o any) any { return db.(*gorm.DB).Last(o) }"
     }
 
-    /// Fetch every record matching the current query into `out`, which must be a pointer to a slice of the model type.
-    func find(db: any, out: any): any = {
-        backend("gorm.io/gorm@v1.25.12"): "func(db any, o any) any { return db.(*gorm.DB).Find(o) }"
+    /// Fetch every record matching the current query and return them as a Sova slice. Pass `new T()` (a typed instance) as `proto` so the extern knows the row shape — the instance itself is only read for its type. Result is an `any`-typed value that must be cast back to `[]T` at the call site, e.g.
+    ///
+    ///     let users = gorm.find(db, new User()) as []User
+    ///
+    /// The shape changed from the original GORM `Find(*slice)` mutate-by-pointer pattern because Sova passes slices by value across `extern` calls — GORM's pointer mutation would not propagate back into the caller's slice variable (and would runtime-panic on an unaddressable slice header). The reflective wrapper here allocates an addressable `*[]T`, hands it to GORM, then returns the populated slice by value.
+    func find(db: any, proto: any): any = {
+        backend("gorm.io/gorm@v1.25.12"): "func(db any, proto any) any { sliceType := reflect.SliceOf(reflect.TypeOf(proto)); slicePtr := reflect.New(sliceType); db.(*gorm.DB).Find(slicePtr.Interface()); return slicePtr.Elem().Interface() }"
     }
 
     func countInto(db: any, holder: []int) = {

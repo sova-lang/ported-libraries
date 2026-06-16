@@ -83,7 +83,7 @@ shapes, primary keys, and indices.
 | `first(db, out)`                           | `any`   | Fetch the first matching row into `out` (pointer).                  |
 | `firstByID(db, out, id)`                   | `any`   | Fetch by primary-key value.                                         |
 | `last(db, out)`                            | `any`   | Fetch the last matching row (PK desc).                              |
-| `find(db, out)`                            | `any`   | Fetch all matching rows into a slice pointer.                       |
+| `find(db, proto)`                          | `any`   | Fetch all matching rows. Pass `new T()` as `proto`; cast the result to `[]T`. |
 | `count(db)`                                | `int`   | Count matching rows.                                                |
 
 Every function returns the chained `db` handle on the Sova side
@@ -96,13 +96,13 @@ Every function returns the chained `db` handle on the Sova side
 let adults = find(
     limit(
         order(
-            where(table(db, "users"), "age >= ?", [18]),
+            whereSql(table(db, "users"), "age >= ?", [18]),
             "name asc",
         ),
         50,
     ),
-    out,
-)
+    new User(),
+) as []User
 ```
 
 | Function                                  | Returns | Description                                       |

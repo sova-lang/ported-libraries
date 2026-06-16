@@ -2,11 +2,11 @@ package gorm on backend
 
 extern {
     /// Add a `WHERE` clause to the current chain. `args` carries the placeholder substitutions: `where(db, "age > ?", [18])`. Returns a new chained handle — bind it to a fresh variable to keep the original `db` unmodified.
-    func where(db: any, query: string, args: []any): any = {
+    func whereSql(db: any, query: string, args: []any): any = {
         backend("gorm.io/gorm@v1.25.12"): "func(db any, q string, a []any) any { return db.(*gorm.DB).Where(q, a...) }"
     }
 
-    /// Add a `NOT` clause; same shape as `where`.
+    /// Add a `NOT` clause; same shape as `whereSql`.
     func not(db: any, query: string, args: []any): any = {
         backend("gorm.io/gorm@v1.25.12"): "func(db any, q string, a []any) any { return db.(*gorm.DB).Not(q, a...) }"
     }
